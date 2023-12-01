@@ -1,0 +1,18 @@
+#/bin/sh
+
+# BASEED ON: wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf
+if [ "$#" -ne 0 ]; then
+	echo "Illegal number of parameters.">&2
+	exit 2
+fi
+
+# urxvt -e sudo -A 
+killall wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf
+wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf &
+
+#sleep 0.5
+
+#disown
+
+exit 0
+

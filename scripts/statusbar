@@ -1,0 +1,47 @@
+#!/bin/sh
+
+DATE=$(date +"%Y-%m-%d")
+TIME=$(date +"%T")
+
+VOL=$(amixer get Master |grep % |awk 'NR==1{print $5}'|sed 's/[^0-9\%]//g')
+
+BATLEFT=$(apm -l)
+BATSTAT=$(apm -a)
+if [ $BATSTAT == 1 ]; then
+  BAT="⚡$BATLEFT%"
+elif [ $BATSTAT == 0 ]; then
+  BAT="$BATLEFT%"
+else
+  BAT="???"
+fi
+
+if [ $(cat /tmp/.ISBOOT) == 1 ]; then
+  echo "0" > /tmp/.ISBOOT
+  killall ifstat
+  killall vmstat
+  ifstat -qS 1 > /tmp/.IFSTATHIST &
+  vmstat 1 > /tmp/.VMSTATHIST &
+  sleep 1
+fi
+
+if [ $(expr $(date +"%s") % 300 ) == 0 ]; then
+  killall ifstat
+  killall vmstat
+  ifstat -qS 1 > /tmp/.IFSTATHIST &
+  vmstat 1 > /tmp/.VMSTATHIST &
+  sleep 1
+fi
+
+CPU="$( tail -n1 /tmp/.VMSTATHIST | awk '{print 100-$NF}' )%"
+
+WIFIIN="$(tail -n1 /tmp/.IFSTATHIST | awk '{print ($(NF-1))}')KB/s"
+WIFIOUT="$(tail -n1 /tmp/.IFSTATHIST | awk '{print ($NF)}')KB/s"
+
+MEM="$(freecolor -o | tail -n2 | head -n1 | awk '{print int($3/$2*100);}')%"
+
+LUX="$(backlight -q)%"
+
+# This is the final template
+printf " | IN/OUT %9s - %9s | CPU%4s | MEM%4s | LUX%4s | VOL%4s | BAT%4s | %s | %s " \
+  $WIFIIN $WIFIOUT $CPU $MEM $LUX $VOL $BAT $DATE $TIME #"ok";
+

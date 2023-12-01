@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: addwifi [SSID] [PASSWRD]">&2
+  exit 2
+fi
+
+wpa_passphrase $1 $2 >> /etc/wpa_supplicant.conf
+
+ifconfig wlan0 ssid $1
+
+service netif restart
+
+killall wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf
+
+wpa_supplicant -i wlan0 -c /etc/wpa_supplicant.conf
+
+exit 0
+

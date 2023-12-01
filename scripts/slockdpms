@@ -1,0 +1,5 @@
+#!/bin/sh
+
+( slock && xset dpms 0 0 0 ) & # dpms 0 0 120 ) & # xset doms here is whats default (right now 120 till screen turns off)
+xset dpms 0 0 2
+xset dpms force off
